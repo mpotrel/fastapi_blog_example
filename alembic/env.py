@@ -15,7 +15,7 @@ from app.models import Base
 config = context.config
 config.set_main_option(
     "sqlalchemy.url",
-    f"postgresql://{settings.database_username}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}",
+    f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}",
 )
 
 # Interpret the config file for Python logging.

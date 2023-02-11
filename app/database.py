@@ -4,7 +4,10 @@ from sqlalchemy.orm import sessionmaker
 
 from .config import settings
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+if not settings.database_password:
+    SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+else:
+    SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
