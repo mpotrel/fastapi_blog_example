@@ -42,4 +42,4 @@ app.include_router(vote.router)
 # This could be an async function
 @app.get("/")
 def root() -> Dict[str, str]:
-    return {"message": "Updated hello world! (with bind)"}
+    return {"message": "hello world"}
