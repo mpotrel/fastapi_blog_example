@@ -57,9 +57,7 @@ def test_create_post(
     assert post.user_id == test_user["id"]
 
 
-def test_create_post_default_published(
-    authorized_client, test_user, test_posts
-):
+def test_create_post_default_published(authorized_client, test_user, test_posts):
     response = authorized_client.post(
         "/posts", json={"title": "title", "content": "content"}
     )
@@ -76,20 +74,59 @@ def test_unauthorized_user_create_post(client, test_posts):
     assert response.status_code == 401
 
 
-def test_delete__post(authorized_client, test_user, test_posts):
+def test_delete_post(authorized_client, test_posts):
     response = authorized_client.delete(f"posts/{test_posts[0].id}")
     assert response.status_code == 204
 
 
-def test_unauthorized_user_delete_post(client, test_user, test_posts):
+def test_unauthorized_user_delete_post(client, test_posts):
     response = client.delete(f"posts/{test_posts[0].id}")
     assert response.status_code == 401
 
 
-def test_delete_inexistant_post(authorized_client, test_user, test_posts):
+def test_delete_inexistant_post(authorized_client, test_posts):
     response = authorized_client.delete("posts/666")
     assert response.status_code == 404
 
 
-def test_delete_other_user_post(authorized_client, test_user, test_posts):
-    pass
+def test_delete_other_user_post(authorized_client, test_users, test_posts):
+    second_user_id = test_users[1]["id"]
+    second_user_post_id = [
+        test_post for test_post in test_posts if test_post.user_id == second_user_id
+    ][0].id
+    response = authorized_client.delete(f"posts/{second_user_post_id}")
+    assert response.status_code == 403
+
+
+def test_update_post(authorized_client, test_user, test_posts):
+    updated_post_id = test_posts[0].id
+    data = {"title": "updated title", "content": "updated content"}
+    response = authorized_client.put(f"/posts/{updated_post_id}", json=data)
+    assert response.status_code == 200
+    updated_post = Post(**response.json())
+    assert updated_post.title == data["title"]
+    assert updated_post.content == data["content"]
+    assert updated_post.id == updated_post_id
+
+
+def test_unauthorized_user_update_post(client, test_posts):
+    updated_post_id = test_posts[0].id
+    data = {"title": "updated title", "content": "updated content"}
+    response = client.put(f"posts/{updated_post_id}", json=data)
+    assert response.status_code == 401
+
+
+def test_update_inexistant_post(authorized_client, test_posts):
+    data = {"title": "updated title", "content": "updated content"}
+    response = authorized_client.put("posts/666", json=data)
+    assert response.status_code == 404
+
+
+def test_update_other_user_post(authorized_client, test_users, test_posts):
+    second_user_id = test_users[1]["id"]
+    second_user_post_id = [
+        test_post for test_post in test_posts if test_post.user_id == second_user_id
+    ][0].id
+    data = {"title": "updated title", "content": "updated content"}
+    response = authorized_client.put(f"posts/{second_user_post_id}", json=data)
+    assert response.status_code == 403
