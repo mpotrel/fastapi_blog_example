@@ -39,14 +39,23 @@ def session():
         db.close()
 
 
+
 @pytest.fixture
-def test_user(client):
-    user_data = {"email": "test_user@test.com", "password": "password_test_user"}
-    response = client.post("/users", json=user_data)
-    test_user_ = response.json()
-    test_user_["password"] = user_data["password"]
-    assert response.status_code == 201
-    return test_user_
+def test_users(client):
+    test_users_ = []
+    for email, password in [("test_user_1@test.com", "password_test_user_1"), ("test_user_2@test.com", "password_test_user_2")]:
+        user_data = {"email": email, "password": password}
+        response = client.post("/users", json=user_data)
+        test_user_ = response.json()
+        test_user_["password"] = user_data["password"]
+        assert response.status_code == 201
+        test_users_.append(test_user_)
+    return test_users_
+
+
+@pytest.fixture
+def test_user(test_users):
+    return test_users[0]
 
 
 @pytest.fixture
@@ -61,11 +70,12 @@ def authorized_client(client, token):
 
 
 @pytest.fixture
-def test_posts(test_user, session):
+def test_posts(test_users, session):
     posts_data = [
-        {"title": "1st title", "content": "1st content", "user_id": test_user["id"]},
-        {"title": "2nd title", "content": "2nd content", "user_id": test_user["id"]},
-        {"title": "3rd title", "content": "3rd content", "user_id": test_user["id"]},
+        {"title": "1st title", "content": "1st content", "user_id": test_users[0]["id"]},
+        {"title": "2nd title", "content": "2nd content", "user_id": test_users[0]["id"]},
+        {"title": "3rd title", "content": "3rd content", "user_id": test_users[0]["id"]},
+        {"title": "extra user title", "content": "extra user content", "user_id": test_users[1]["id"]},
     ]
     session.add_all([models.Post(**post_data) for post_data in posts_data])
     session.commit()
