@@ -24,7 +24,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Pass origins if you want, ["*"] if you want to allow everyone
+    allow_origins=[
+        "*"
+    ],  # Pass origins if you want, ["*"] if you want to allow everyone
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,4 +42,4 @@ app.include_router(vote.router)
 # This could be an async function
 @app.get("/")
 def root() -> Dict[str, str]:
-    return {"message": "hello world"}
+    return {"message": "hello world from CI/CD"}

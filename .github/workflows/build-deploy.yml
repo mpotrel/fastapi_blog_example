@@ -96,8 +96,17 @@ jobs:
   deploy:
     needs: [build_and_test]
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       -
         name: Deployment
-        run: echo "Deploying now"
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          password: ${{ secrets.PROD_PASSWORD }}
+          script: |
+            cd app/src
+            git pull
+            echo ${{ secrets.PROD_PASSWORD }} | sudo -S systemctl restart api
