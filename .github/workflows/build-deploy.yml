@@ -9,7 +9,7 @@ on:
       - "main"
 
 jobs:
-  python_setup:
+  build_and_test:
     environment:
       name: testing
     env:
@@ -92,3 +92,12 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  deploy:
+    needs: [build_and_test]
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Deployment
+        run: echo "Deploying now"
