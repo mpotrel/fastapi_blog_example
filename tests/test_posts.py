@@ -19,7 +19,7 @@ def test_unauthorized_user_get_all_posts(client, test_posts):
 
 def test_get_one_post(authorized_client, test_posts):
     response = authorized_client.get(f"/posts/{test_posts[0].id}")
-    post = Post(**response.json())
+    post = PostWithVotes(**response.json())
     assert post.id == test_posts[0].id
     assert post.content == test_posts[0].content
     assert post.title == test_posts[0].title

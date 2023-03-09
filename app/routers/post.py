@@ -16,10 +16,14 @@ def get_posts(
     user: schemas.UserResponse = Depends(oauth2.get_current_user),
     limit: int = 10,
     skip: int = 0,
-    search: str = ""
+    search: str = "",
 ):
-    query_posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).filter(models.Post.title.contains(search))
-    join_with_votes = query_posts.join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+    query_posts = db.query(
+        models.Post, func.count(models.Vote.post_id).label("votes")
+    ).filter(models.Post.title.contains(search))
+    join_with_votes = query_posts.join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter=True
+    )
     groupby_post = join_with_votes.group_by(models.Post.id)
     # NOTE If you want to have a User in the response, skip the subquery and change the response schema
     return db.query(groupby_post.limit(limit).offset(skip).subquery()).all()
@@ -42,20 +46,28 @@ def get_latest_post(
 
 
 @router.get(
-    "/{id}", response_model=schemas.Post
+    "/{id}", response_model=schemas.PostWithVotes
 )  # path parameter, this has to be the last defined GET on posts/sthg
 def get_post(
     id: int,
     db: Session = Depends(get_db),
     user: schemas.UserResponse = Depends(oauth2.get_current_user),
 ):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    query_posts = db.query(
+        models.Post, func.count(models.Vote.post_id).label("votes")
+    ).filter(models.Post.id == id)
+    join_with_votes = query_posts.join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter=True
+    )
+    groupby_post = join_with_votes.group_by(models.Post.id)
+    post = db.query(groupby_post.subquery()).first()
     if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} was not found",
         )
     return post
+
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
