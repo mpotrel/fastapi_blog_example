@@ -55,7 +55,7 @@ class PostWithVotes(PostBase):
 
 class Vote(BaseModel):
     post_id: int
-    dir : int
+    dir: int
 
     @validator("dir")
     def dir_must_be_0_or_1(cls, v):
